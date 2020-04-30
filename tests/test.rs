@@ -1047,7 +1047,7 @@ fn test_parse_string() {
 
 #[test]
 fn test_parse_list() {
-    test_parse_err::<Vec<f64>>(&[
+    test_parse_err::<Vec<u64>>(&[
         ("[", "EOF while parsing a list at line 1 column 1"),
         ("[ ", "EOF while parsing a list at line 1 column 2"),
         ("[1", "EOF while parsing a list at line 1 column 2"),

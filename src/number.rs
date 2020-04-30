@@ -554,8 +554,20 @@ impl<'de> Deserializer<'de> for Number {
     deserialize_number!(deserialize_u16 => visit_u16);
     deserialize_number!(deserialize_u32 => visit_u32);
     deserialize_number!(deserialize_u64 => visit_u64);
+
+    #[cfg(feature = "floats")]
     deserialize_number!(deserialize_f32 => visit_f32);
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f32<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
+    }
+
+    #[cfg(feature = "floats")]
     deserialize_number!(deserialize_f64 => visit_f64);
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f64<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
+    }
 
     serde_if_integer128! {
         deserialize_number!(deserialize_i128 => visit_i128);
@@ -582,8 +594,20 @@ impl<'de, 'a> Deserializer<'de> for &'a Number {
     deserialize_number!(deserialize_u16 => visit_u16);
     deserialize_number!(deserialize_u32 => visit_u32);
     deserialize_number!(deserialize_u64 => visit_u64);
+
+    #[cfg(feature = "floats")]
     deserialize_number!(deserialize_f32 => visit_f32);
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f32<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
+    }
+
+    #[cfg(feature = "floats")]
     deserialize_number!(deserialize_f64 => visit_f64);
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f64<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
+    }
 
     serde_if_integer128! {
         deserialize_number!(deserialize_i128 => visit_i128);

@@ -1241,8 +1241,20 @@ impl<'de, 'a, R: Read<'de>> de::Deserializer<'de> for &'a mut Deserializer<R> {
     deserialize_prim_number!(deserialize_u16);
     deserialize_prim_number!(deserialize_u32);
     deserialize_prim_number!(deserialize_u64);
+
+    #[cfg(feature = "floats")]
     deserialize_prim_number!(deserialize_f32);
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f32<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value> {
+        unimplemented!()
+    }
+
+    #[cfg(feature = "floats")]
     deserialize_prim_number!(deserialize_f64);
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f64<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value> {
+        unimplemented!()
+    }
 
     serde_if_integer128! {
         fn deserialize_i128<V>(self, visitor: V) -> Result<V::Value>
