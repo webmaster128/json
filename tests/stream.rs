@@ -77,6 +77,7 @@ fn test_json_stream_truncated() {
 }
 
 #[test]
+#[cfg(feature = "floats")]
 fn test_json_stream_truncated_decimal() {
     let data = "{\"x\":4.";
 
@@ -97,6 +98,7 @@ fn test_json_stream_truncated_negative() {
 }
 
 #[test]
+#[cfg(feature = "floats")]
 fn test_json_stream_truncated_exponent() {
     let data = "{\"x\":4e";
 

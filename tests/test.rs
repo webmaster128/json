@@ -723,6 +723,7 @@ fn test_parse_char() {
 }
 
 #[test]
+#[cfg(feature = "floats")]
 fn test_parse_number_errors() {
     test_parse_err::<f64>(&[
         ("+", "expected value at line 1 column 1"),
@@ -797,6 +798,7 @@ fn test_parse_u64() {
 }
 
 #[test]
+#[cfg(feature = "floats")]
 fn test_parse_negative_zero() {
     for negative_zero in &[
         "-0.0",
@@ -814,6 +816,7 @@ fn test_parse_negative_zero() {
 }
 
 #[test]
+#[cfg(feature = "floats")]
 fn test_parse_f64() {
     test_parse_ok(vec![
         ("0.0", 0.0f64),
@@ -931,6 +934,7 @@ fn test_malicious_number() {
 }
 
 #[test]
+#[cfg(feature = "floats")]
 fn test_parse_number() {
     test_parse_ok(vec![
         ("0.0", Number::from_f64(0.0f64).unwrap()),

@@ -787,21 +787,21 @@ impl Value {
     /// use serde_json::Value;
     ///
     /// fn main() {
-    ///     let s = r#"{"x": 1.0, "y": 2.0}"#;
+    ///     let s = r#"{"x": 1, "y": 2}"#;
     ///     let mut value: Value = serde_json::from_str(s).unwrap();
     ///
     ///     // Check value using read-only pointer
-    ///     assert_eq!(value.pointer("/x"), Some(&1.0.into()));
+    ///     assert_eq!(value.pointer("/x"), Some(&1.into()));
     ///     // Change value with direct assignment
-    ///     *value.pointer_mut("/x").unwrap() = 1.5.into();
+    ///     *value.pointer_mut("/x").unwrap() = 7.into();
     ///     // Check that new value was written
-    ///     assert_eq!(value.pointer("/x"), Some(&1.5.into()));
+    ///     assert_eq!(value.pointer("/x"), Some(&7.into()));
     ///     // Or change the value only if it exists
-    ///     value.pointer_mut("/x").map(|v| *v = 1.5.into());
+    ///     value.pointer_mut("/x").map(|v| *v = 8.into());
     ///
     ///     // "Steal" ownership of a value. Can replace with any valid Value.
     ///     let old_x = value.pointer_mut("/x").map(Value::take).unwrap();
-    ///     assert_eq!(old_x, 1.5);
+    ///     assert_eq!(old_x, 8);
     ///     assert_eq!(value.pointer("/x").unwrap(), &Value::Null);
     /// }
     /// ```

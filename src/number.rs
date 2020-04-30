@@ -619,6 +619,7 @@ impl<'de> Deserializer<'de> for NumberFieldDeserializer {
 impl From<ParserNumber> for Number {
     fn from(value: ParserNumber) -> Self {
         let n = match value {
+            #[cfg(feature = "floats")]
             ParserNumber::F64(f) => {
                 #[cfg(not(feature = "arbitrary_precision"))]
                 {
