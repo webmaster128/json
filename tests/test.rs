@@ -22,6 +22,7 @@ use std::iter;
 use std::marker::PhantomData;
 use std::str::FromStr;
 use std::string::ToString;
+#[cfg(feature = "floats")]
 use std::{f32, f64};
 use std::{i16, i32, i64, i8};
 use std::{u16, u32, u64, u8};
@@ -121,6 +122,7 @@ fn test_write_i64() {
 }
 
 #[test]
+#[cfg(feature = "floats")]
 fn test_write_f64() {
     let tests = &[
         (3.0, "3.0"),
@@ -136,6 +138,7 @@ fn test_write_f64() {
 }
 
 #[test]
+#[cfg(feature = "floats")]
 fn test_encode_nonfinite_float_yields_null() {
     let v = to_value(::std::f64::NAN).unwrap();
     assert!(v.is_null());
@@ -184,6 +187,7 @@ fn test_write_char() {
 }
 
 #[test]
+#[cfg(feature = "floats")]
 fn test_write_list() {
     test_encode_ok(&[
         (vec![], "[]"),
@@ -1910,6 +1914,9 @@ fn test_partialeq_number() {
     number_partialeq_ok!(0 1 100
         i8::MIN i8::MAX i16::MIN i16::MAX i32::MIN i32::MAX i64::MIN i64::MAX
         u8::MIN u8::MAX u16::MIN u16::MAX u32::MIN u32::MAX u64::MIN u64::MAX
+    );
+    #[cfg(feature = "floats")]
+    number_partialeq_ok!(0 1 100
         f32::MIN f32::MAX f32::MIN_EXP f32::MAX_EXP f32::MIN_POSITIVE
         f64::MIN f64::MAX f64::MIN_EXP f64::MAX_EXP f64::MIN_POSITIVE
         f32::consts::E f32::consts::PI f32::consts::LN_2 f32::consts::LOG2_E

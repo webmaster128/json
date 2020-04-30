@@ -2,6 +2,7 @@
 
 use crate::error::{Error, ErrorCode, Result};
 use crate::io;
+#[cfg(feature = "floats")]
 use crate::lib::num::FpCategory;
 use crate::lib::*;
 use serde::ser::{self, Impossible, Serialize};
@@ -171,6 +172,7 @@ where
     }
 
     #[inline]
+    #[cfg(feature = "floats")]
     fn serialize_f32(self, value: f32) -> Result<()> {
         match value.classify() {
             FpCategory::Nan | FpCategory::Infinite => {
@@ -190,6 +192,13 @@ where
     }
 
     #[inline]
+    #[cfg(not(feature = "floats"))]
+    fn serialize_f32(self, _v: f32) -> Result<()> {
+        unreachable!()
+    }
+
+    #[inline]
+    #[cfg(feature = "floats")]
     fn serialize_f64(self, value: f64) -> Result<()> {
         match value.classify() {
             FpCategory::Nan | FpCategory::Infinite => {
@@ -206,6 +215,12 @@ where
             }
         }
         Ok(())
+    }
+
+    #[inline]
+    #[cfg(not(feature = "floats"))]
+    fn serialize_f64(self, _v: f64) -> Result<()> {
+        unreachable!()
     }
 
     #[inline]
@@ -1714,6 +1729,7 @@ pub trait Formatter {
 
     /// Writes a floating point value like `-31.26e+12` to the specified writer.
     #[inline]
+    #[cfg(feature = "floats")]
     fn write_f32<W>(&mut self, writer: &mut W, value: f32) -> io::Result<()>
     where
         W: ?Sized + io::Write,
@@ -1725,6 +1741,7 @@ pub trait Formatter {
 
     /// Writes a floating point value like `-31.26e+12` to the specified writer.
     #[inline]
+    #[cfg(feature = "floats")]
     fn write_f64<W>(&mut self, writer: &mut W, value: f64) -> io::Result<()>
     where
         W: ?Sized + io::Write,

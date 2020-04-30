@@ -28,6 +28,7 @@ enum N {
     /// Always less than zero.
     NegInt(i64),
     /// Always finite.
+    #[cfg(feature = "floats")]
     Float(f64),
 }
 
@@ -49,7 +50,7 @@ impl Number {
     /// # use serde_json::json;
     /// #
     /// let big = i64::max_value() as u64 + 10;
-    /// let v = json!({ "a": 64, "b": big, "c": 256.0 });
+    /// let v = json!({ "a": 64, "b": big, "c": false });
     ///
     /// assert!(v["a"].is_i64());
     ///
@@ -65,6 +66,7 @@ impl Number {
         match self.n {
             N::PosInt(v) => v <= i64::max_value() as u64,
             N::NegInt(_) => true,
+            #[cfg(feature = "floats")]
             N::Float(_) => false,
         }
         #[cfg(feature = "arbitrary_precision")]
@@ -79,7 +81,7 @@ impl Number {
     /// ```
     /// # use serde_json::json;
     /// #
-    /// let v = json!({ "a": 64, "b": -64, "c": 256.0 });
+    /// let v = json!({ "a": 64, "b": -64, "c": false });
     ///
     /// assert!(v["a"].is_u64());
     ///
@@ -94,7 +96,9 @@ impl Number {
         #[cfg(not(feature = "arbitrary_precision"))]
         match self.n {
             N::PosInt(_) => true,
-            N::NegInt(_) | N::Float(_) => false,
+            N::NegInt(_) => false,
+            #[cfg(feature = "floats")]
+            N::Float(_) => false,
         }
         #[cfg(feature = "arbitrary_precision")]
         self.as_u64().is_some()
@@ -120,6 +124,7 @@ impl Number {
     /// assert!(!v["c"].is_f64());
     /// ```
     #[inline]
+    #[cfg(feature = "floats")]
     pub fn is_f64(&self) -> bool {
         #[cfg(not(feature = "arbitrary_precision"))]
         match self.n {
@@ -144,7 +149,7 @@ impl Number {
     /// # use serde_json::json;
     /// #
     /// let big = i64::max_value() as u64 + 10;
-    /// let v = json!({ "a": 64, "b": big, "c": 256.0 });
+    /// let v = json!({ "a": 64, "b": big, "c": false });
     ///
     /// assert_eq!(v["a"].as_i64(), Some(64));
     /// assert_eq!(v["b"].as_i64(), None);
@@ -162,6 +167,7 @@ impl Number {
                 }
             }
             N::NegInt(n) => Some(n),
+            #[cfg(feature = "floats")]
             N::Float(_) => None,
         }
         #[cfg(feature = "arbitrary_precision")]
@@ -174,7 +180,7 @@ impl Number {
     /// ```
     /// # use serde_json::json;
     /// #
-    /// let v = json!({ "a": 64, "b": -64, "c": 256.0 });
+    /// let v = json!({ "a": 64, "b": -64, "c": false });
     ///
     /// assert_eq!(v["a"].as_u64(), Some(64));
     /// assert_eq!(v["b"].as_u64(), None);
@@ -185,7 +191,9 @@ impl Number {
         #[cfg(not(feature = "arbitrary_precision"))]
         match self.n {
             N::PosInt(n) => Some(n),
-            N::NegInt(_) | N::Float(_) => None,
+            N::NegInt(_) => None,
+            #[cfg(feature = "floats")]
+            N::Float(_) => None,
         }
         #[cfg(feature = "arbitrary_precision")]
         self.n.parse().ok()
@@ -203,6 +211,7 @@ impl Number {
     /// assert_eq!(v["c"].as_f64(), Some(-64.0));
     /// ```
     #[inline]
+    #[cfg(feature = "floats")]
     pub fn as_f64(&self) -> Option<f64> {
         #[cfg(not(feature = "arbitrary_precision"))]
         match self.n {
@@ -227,6 +236,7 @@ impl Number {
     /// assert!(Number::from_f64(f64::NAN).is_none());
     /// ```
     #[inline]
+    #[cfg(feature = "floats")]
     pub fn from_f64(f: f64) -> Option<Number> {
         if f.is_finite() {
             let n = {
@@ -260,6 +270,7 @@ impl fmt::Display for Number {
         match self.n {
             N::PosInt(u) => Display::fmt(&u, formatter),
             N::NegInt(i) => Display::fmt(&i, formatter),
+            #[cfg(feature = "floats")]
             N::Float(f) => Display::fmt(&f, formatter),
         }
     }
@@ -281,6 +292,7 @@ impl Debug for Number {
             N::NegInt(i) => {
                 debug.field(&i);
             }
+            #[cfg(feature = "floats")]
             N::Float(f) => {
                 debug.field(&f);
             }
@@ -304,6 +316,7 @@ impl Serialize for Number {
         match self.n {
             N::PosInt(u) => serializer.serialize_u64(u),
             N::NegInt(i) => serializer.serialize_i64(i),
+            #[cfg(feature = "floats")]
             N::Float(f) => serializer.serialize_f64(f),
         }
     }
@@ -348,11 +361,21 @@ impl<'de> Deserialize<'de> for Number {
             }
 
             #[inline]
+            #[cfg(feature = "floats")]
             fn visit_f64<E>(self, value: f64) -> Result<Number, E>
             where
                 E: de::Error,
             {
                 Number::from_f64(value).ok_or_else(|| de::Error::custom("not a JSON number"))
+            }
+
+            #[inline]
+            #[cfg(not(feature = "floats"))]
+            fn visit_f64<E>(self, _value: f64) -> Result<Number, E>
+            where
+                E: de::Error,
+            {
+                unreachable!();
             }
 
             #[cfg(feature = "arbitrary_precision")]
@@ -458,6 +481,7 @@ macro_rules! deserialize_any {
             match self.n {
                 N::PosInt(u) => visitor.visit_u64(u),
                 N::NegInt(i) => visitor.visit_i64(i),
+                #[cfg(feature = "floats")]
                 N::Float(f) => visitor.visit_f64(f),
             }
         }
@@ -471,9 +495,14 @@ macro_rules! deserialize_any {
                 return visitor.visit_u64(u);
             } else if let Some(i) = self.as_i64() {
                 return visitor.visit_i64(i);
-            } else if let Some(f) = self.as_f64() {
-                if ryu::Buffer::new().format_finite(f) == self.n || f.to_string() == self.n {
-                    return visitor.visit_f64(f);
+            } else  {
+                #[cfg(feature = "floats")]
+                {
+                    if let Some(f) = self.as_f64() {
+                        if ryu::Buffer::new().format_finite(f) == self.n || f.to_string() == self.n {
+                            return visitor.visit_f64(f);
+                        }
+                    }
                 }
             }
 
@@ -734,6 +763,7 @@ impl Number {
         match self.n {
             N::PosInt(u) => Unexpected::Unsigned(u),
             N::NegInt(i) => Unexpected::Signed(i),
+            #[cfg(feature = "floats")]
             N::Float(f) => Unexpected::Float(f),
         }
     }

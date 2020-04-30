@@ -2,6 +2,7 @@ use crate::error::Error;
 use crate::lib::str::FromStr;
 use crate::lib::*;
 use crate::map::Map;
+#[cfg(feature = "floats")]
 use crate::number::Number;
 use crate::value::Value;
 use serde::de::{
@@ -44,6 +45,7 @@ impl<'de> Deserialize<'de> for Value {
             }
 
             #[inline]
+            #[cfg(feature = "floats")]
             fn visit_f64<E>(self, value: f64) -> Result<Value, E> {
                 Ok(Number::from_f64(value).map_or(Value::Null, Value::Number))
             }

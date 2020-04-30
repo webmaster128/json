@@ -132,7 +132,7 @@ pub enum Value {
     /// ```
     /// # use serde_json::json;
     /// #
-    /// let v = json!(12.5);
+    /// let v = json!(12);
     /// ```
     Number(Number),
 
@@ -511,7 +511,7 @@ impl Value {
     /// # use serde_json::json;
     /// #
     /// let big = i64::max_value() as u64 + 10;
-    /// let v = json!({ "a": 64, "b": big, "c": 256.0 });
+    /// let v = json!({ "a": 64, "b": big, "c": false });
     ///
     /// assert!(v["a"].is_i64());
     ///
@@ -536,7 +536,7 @@ impl Value {
     /// ```
     /// # use serde_json::json;
     /// #
-    /// let v = json!({ "a": 64, "b": -64, "c": 256.0 });
+    /// let v = json!({ "a": 64, "b": -64, "c": false });
     ///
     /// assert!(v["a"].is_u64());
     ///
@@ -572,6 +572,7 @@ impl Value {
     /// assert!(!v["b"].is_f64());
     /// assert!(!v["c"].is_f64());
     /// ```
+    #[cfg(feature = "floats")]
     pub fn is_f64(&self) -> bool {
         match *self {
             Value::Number(ref n) => n.is_f64(),
@@ -586,7 +587,7 @@ impl Value {
     /// # use serde_json::json;
     /// #
     /// let big = i64::max_value() as u64 + 10;
-    /// let v = json!({ "a": 64, "b": big, "c": 256.0 });
+    /// let v = json!({ "a": 64, "b": big, "c": false });
     ///
     /// assert_eq!(v["a"].as_i64(), Some(64));
     /// assert_eq!(v["b"].as_i64(), None);
@@ -605,7 +606,7 @@ impl Value {
     /// ```
     /// # use serde_json::json;
     /// #
-    /// let v = json!({ "a": 64, "b": -64, "c": 256.0 });
+    /// let v = json!({ "a": 64, "b": -64, "c": false });
     ///
     /// assert_eq!(v["a"].as_u64(), Some(64));
     /// assert_eq!(v["b"].as_u64(), None);
@@ -630,6 +631,7 @@ impl Value {
     /// assert_eq!(v["b"].as_f64(), Some(64.0));
     /// assert_eq!(v["c"].as_f64(), Some(-64.0));
     /// ```
+    #[cfg(feature = "floats")]
     pub fn as_f64(&self) -> Option<f64> {
         match *self {
             Value::Number(ref n) => n.as_f64(),

@@ -4,6 +4,7 @@ use serde_json::{json, Number, Value};
 fn number() {
     assert_eq!(format!("{:?}", Number::from(1)), "Number(1)");
     assert_eq!(format!("{:?}", Number::from(-1)), "Number(-1)");
+    #[cfg(feature = "floats")]
     assert_eq!(
         format!("{:?}", Number::from_f64(1.0).unwrap()),
         "Number(1.0)"
@@ -25,6 +26,7 @@ fn value_bool() {
 fn value_number() {
     assert_eq!(format!("{:?}", json!(1)), "Number(1)");
     assert_eq!(format!("{:?}", json!(-1)), "Number(-1)");
+    #[cfg(feature = "floats")]
     assert_eq!(format!("{:?}", json!(1.0)), "Number(1.0)");
 }
 
