@@ -604,9 +604,23 @@ impl<'de> serde::Deserializer<'de> for SeqDeserializer {
     }
 
     forward_to_deserialize_any! {
-        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
+        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 char str string
         bytes byte_buf option unit unit_struct newtype_struct seq tuple
         tuple_struct map struct enum identifier ignored_any
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f32 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f32<V: Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f64 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f64<V: Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
     }
 }
 
@@ -694,9 +708,23 @@ impl<'de> serde::Deserializer<'de> for MapDeserializer {
     }
 
     forward_to_deserialize_any! {
-        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
+        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 char str string
         bytes byte_buf option unit unit_struct newtype_struct seq tuple
         tuple_struct map struct enum identifier ignored_any
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f32 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f32<V: Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f64 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f64<V: Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
     }
 }
 
@@ -1148,9 +1176,23 @@ impl<'de> serde::Deserializer<'de> for SeqRefDeserializer<'de> {
     }
 
     forward_to_deserialize_any! {
-        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
+        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 char str string
         bytes byte_buf option unit unit_struct newtype_struct seq tuple
         tuple_struct map struct enum identifier ignored_any
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f32 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f32<V: Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f64 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f64<V: Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
     }
 }
 
@@ -1238,9 +1280,23 @@ impl<'de> serde::Deserializer<'de> for MapRefDeserializer<'de> {
     }
 
     forward_to_deserialize_any! {
-        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
+        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 char str string
         bytes byte_buf option unit unit_struct newtype_struct seq tuple
         tuple_struct map struct enum identifier ignored_any
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f32 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f32<V: Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f64 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f64<V: Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
     }
 }
 
@@ -1324,8 +1380,22 @@ impl<'de> serde::Deserializer<'de> for MapKeyDeserializer<'de> {
     }
 
     forward_to_deserialize_any! {
-        bool f32 f64 char str string bytes byte_buf unit unit_struct seq tuple
+        bool char str string bytes byte_buf unit unit_struct seq tuple
         tuple_struct map struct identifier ignored_any
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f32 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f32<V: Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f64 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f64<V: Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
     }
 }
 
@@ -1444,9 +1514,23 @@ impl<'de> de::Deserializer<'de> for BorrowedCowStrDeserializer<'de> {
     }
 
     forward_to_deserialize_any! {
-        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
+        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 char str string
         bytes byte_buf option unit unit_struct newtype_struct seq tuple
         tuple_struct map struct identifier ignored_any
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f32 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f32<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f64 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f64<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
     }
 }
 

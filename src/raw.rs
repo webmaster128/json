@@ -457,9 +457,23 @@ impl<'de> Deserializer<'de> for RawKeyDeserializer {
     }
 
     forward_to_deserialize_any! {
-        bool u8 u16 u32 u64 u128 i8 i16 i32 i64 i128 f32 f64 char str string seq
+        bool u8 u16 u32 u64 u128 i8 i16 i32 i64 i128 char str string seq
         bytes byte_buf map struct option unit newtype_struct ignored_any
         unit_struct tuple_struct tuple enum identifier
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f32 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f32<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f64 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f64<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value, Error> {
+        unimplemented!()
     }
 }
 

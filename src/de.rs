@@ -2047,8 +2047,22 @@ where
     }
 
     forward_to_deserialize_any! {
-        bool f32 f64 char str string unit unit_struct seq tuple tuple_struct map
+        bool char str string unit unit_struct seq tuple tuple_struct map
         struct identifier ignored_any
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f32 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f32<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value> {
+        unimplemented!()
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f64 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f64<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value> {
+        unimplemented!()
     }
 }
 
