@@ -7,6 +7,7 @@ enum E {
 }
 
 #[test]
+#[cfg(feature = "floats")]
 fn test() {
     let e = E::Float(159.1);
     let v = serde_json::to_value(e).unwrap();

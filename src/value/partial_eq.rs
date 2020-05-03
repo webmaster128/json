@@ -9,6 +9,7 @@ fn eq_u64(value: &Value, other: u64) -> bool {
     value.as_u64().map_or(false, |i| i == other)
 }
 
+#[cfg(feature = "floats")]
 fn eq_f64(value: &Value, other: f64) -> bool {
     value.as_f64().map_or(false, |i| i == other)
 }
@@ -90,6 +91,9 @@ macro_rules! partialeq_numeric {
 partialeq_numeric! {
     eq_i64[i8 i16 i32 i64 isize]
     eq_u64[u8 u16 u32 u64 usize]
-    eq_f64[f32 f64]
     eq_bool[bool]
+}
+#[cfg(feature = "floats")]
+partialeq_numeric! {
+    eq_f64[f32 f64]
 }

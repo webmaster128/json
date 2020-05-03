@@ -20,7 +20,7 @@ appveyor = { repository = "serde-rs/json" }
 serde = { version = "1.0.100", default-features = false }
 indexmap = { version = "1.2", optional = true }
 itoa = { version = "0.4.3", default-features = false }
-ryu = "1.0"
+ryu = { version = "1.0", optional = true }
 
 [dev-dependencies]
 automod = "0.1"
@@ -76,3 +76,8 @@ raw_value = []
 # overflow the stack after deserialization has completed, including, but not
 # limited to, Display and Debug and Drop impls.
 unbounded_depth = []
+
+# Allows serializing/deserializing floats.
+# This ensure no float related Wasm instruction exists in the compilation result,
+# even in dead code branches.
+floats = ["ryu"]

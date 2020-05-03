@@ -1,6 +1,7 @@
 use crate::error::{Error, ErrorCode, Result};
 use crate::lib::*;
 use crate::map::Map;
+#[cfg(feature = "floats")]
 use crate::number::Number;
 use crate::value::{to_value, Value};
 use serde::ser::{Impossible, Serialize};
@@ -126,13 +127,27 @@ impl serde::Serializer for Serializer {
     }
 
     #[inline]
+    #[cfg(feature = "floats")]
     fn serialize_f32(self, value: f32) -> Result<Value> {
         self.serialize_f64(value as f64)
     }
 
     #[inline]
+    #[cfg(not(feature = "floats"))]
+    fn serialize_f32(self, _v: f32) -> Result<Value> {
+        unreachable!()
+    }
+
+    #[inline]
+    #[cfg(feature = "floats")]
     fn serialize_f64(self, value: f64) -> Result<Value> {
         Ok(Number::from_f64(value).map_or(Value::Null, Value::Number))
+    }
+
+    #[inline]
+    #[cfg(not(feature = "floats"))]
+    fn serialize_f64(self, _v: f64) -> Result<Value> {
+        unreachable!()
     }
 
     #[inline]

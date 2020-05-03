@@ -97,6 +97,7 @@ macro_rules! overflow {
 }
 
 pub(crate) enum ParserNumber {
+    #[cfg(feature = "floats")]
     F64(f64),
     U64(u64),
     I64(i64),
@@ -110,6 +111,7 @@ impl ParserNumber {
         V: de::Visitor<'de>,
     {
         match self {
+            #[cfg(feature = "floats")]
             ParserNumber::F64(x) => visitor.visit_f64(x),
             ParserNumber::U64(x) => visitor.visit_u64(x),
             ParserNumber::I64(x) => visitor.visit_i64(x),
@@ -120,6 +122,7 @@ impl ParserNumber {
 
     fn invalid_type(self, exp: &dyn Expected) -> Error {
         match self {
+            #[cfg(feature = "floats")]
             ParserNumber::F64(x) => de::Error::invalid_type(Unexpected::Float(x), exp),
             ParserNumber::U64(x) => de::Error::invalid_type(Unexpected::Unsigned(x), exp),
             ParserNumber::I64(x) => de::Error::invalid_type(Unexpected::Signed(x), exp),
@@ -410,11 +413,14 @@ impl<'de, R: Read<'de>> Deserializer<R> {
                             // number as a `u64` until we grow too large. At that point, switch to
                             // parsing the value as a `f64`.
                             if overflow!(res * 10 + digit, u64::max_value()) {
+                                #[cfg(feature = "floats")]
                                 return Ok(ParserNumber::F64(tri!(self.parse_long_integer(
                                     positive,
                                     res,
                                     1, // res * 10^1
                                 ))));
+                                #[cfg(not(feature = "floats"))]
+                                return Err(self.error(ErrorCode::FloatsDisallowed));
                             }
 
                             res = res * 10 + digit;
@@ -429,6 +435,7 @@ impl<'de, R: Read<'de>> Deserializer<R> {
         }
     }
 
+    #[cfg(feature = "floats")]
     fn parse_long_integer(
         &mut self,
         positive: bool,
@@ -458,7 +465,9 @@ impl<'de, R: Read<'de>> Deserializer<R> {
 
     fn parse_number(&mut self, positive: bool, significand: u64) -> Result<ParserNumber> {
         Ok(match tri!(self.peek_or_null()) {
+            #[cfg(feature = "floats")]
             b'.' => ParserNumber::F64(tri!(self.parse_decimal(positive, significand, 0))),
+            #[cfg(feature = "floats")]
             b'e' | b'E' => ParserNumber::F64(tri!(self.parse_exponent(positive, significand, 0))),
             _ => {
                 if positive {
@@ -468,7 +477,12 @@ impl<'de, R: Read<'de>> Deserializer<R> {
 
                     // Convert into a float if we underflow.
                     if neg > 0 {
-                        ParserNumber::F64(-(significand as f64))
+                        #[cfg(feature = "floats")]
+                        {
+                            ParserNumber::F64(-(significand as f64))
+                        }
+                        #[cfg(not(feature = "floats"))]
+                        return Err(self.error(ErrorCode::FloatsDisallowed));
                     } else {
                         ParserNumber::I64(neg)
                     }
@@ -477,6 +491,7 @@ impl<'de, R: Read<'de>> Deserializer<R> {
         })
     }
 
+    #[cfg(feature = "floats")]
     fn parse_decimal(
         &mut self,
         positive: bool,
@@ -517,6 +532,7 @@ impl<'de, R: Read<'de>> Deserializer<R> {
         }
     }
 
+    #[cfg(feature = "floats")]
     fn parse_exponent(
         &mut self,
         positive: bool,
@@ -576,6 +592,7 @@ impl<'de, R: Read<'de>> Deserializer<R> {
     // exponent-parsing loop above.
     #[cold]
     #[inline(never)]
+    #[cfg(feature = "floats")]
     fn parse_exponent_overflow(
         &mut self,
         positive: bool,
@@ -743,6 +760,7 @@ impl<'de, R: Read<'de>> Deserializer<R> {
         Ok(())
     }
 
+    #[cfg(feature = "floats")]
     fn f64_from_parts(
         &mut self,
         positive: bool,
@@ -1025,6 +1043,7 @@ impl FromStr for Number {
 
 // Clippy bug: https://github.com/rust-lang/rust-clippy/issues/5201
 #[allow(clippy::excessive_precision)]
+#[cfg(feature = "floats")]
 static POW10: [f64; 309] = [
     1e000, 1e001, 1e002, 1e003, 1e004, 1e005, 1e006, 1e007, 1e008, 1e009, //
     1e010, 1e011, 1e012, 1e013, 1e014, 1e015, 1e016, 1e017, 1e018, 1e019, //
@@ -1222,8 +1241,20 @@ impl<'de, 'a, R: Read<'de>> de::Deserializer<'de> for &'a mut Deserializer<R> {
     deserialize_prim_number!(deserialize_u16);
     deserialize_prim_number!(deserialize_u32);
     deserialize_prim_number!(deserialize_u64);
+
+    #[cfg(feature = "floats")]
     deserialize_prim_number!(deserialize_f32);
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f32<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value> {
+        unimplemented!()
+    }
+
+    #[cfg(feature = "floats")]
     deserialize_prim_number!(deserialize_f64);
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f64<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value> {
+        unimplemented!()
+    }
 
     serde_if_integer128! {
         fn deserialize_i128<V>(self, visitor: V) -> Result<V::Value>
@@ -2016,8 +2047,22 @@ where
     }
 
     forward_to_deserialize_any! {
-        bool f32 f64 char str string unit unit_struct seq tuple tuple_struct map
+        bool char str string unit unit_struct seq tuple tuple_struct map
         struct identifier ignored_any
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f32 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f32<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value> {
+        unimplemented!()
+    }
+
+    #[cfg(feature = "floats")]
+    forward_to_deserialize_any! { f64 }
+    #[cfg(not(feature = "floats"))]
+    fn deserialize_f64<V: de::Visitor<'de>>(self, _: V) -> Result<V::Value> {
+        unimplemented!()
     }
 }
 

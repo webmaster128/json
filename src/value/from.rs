@@ -2,6 +2,7 @@ use super::Value;
 use crate::lib::iter::FromIterator;
 use crate::lib::*;
 use crate::map::Map;
+#[cfg(feature = "floats")]
 use crate::number::Number;
 
 #[cfg(feature = "arbitrary_precision")]
@@ -31,6 +32,7 @@ serde_if_integer128! {
     }
 }
 
+#[cfg(feature = "floats")]
 impl From<f32> for Value {
     /// Convert 32-bit floating point number to `Value`
     ///
@@ -47,6 +49,7 @@ impl From<f32> for Value {
     }
 }
 
+#[cfg(feature = "floats")]
 impl From<f64> for Value {
     /// Convert 64-bit floating point number to `Value`
     ///
